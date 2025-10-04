@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: money-tracker-db
+    environment:
+      POSTGRES_USER: steve-chan
+      POSTGRES_PASSWORD: 98827934
+      POSTGRES_DB: money-tracker-db
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+  prisma:
+    image: node:18
+    container_name: prisma_migrate
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    command: >
+      sh -c "npm install && npx prisma generate && npx prisma migrate dev --name init"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/demo_db?schema=public
+volumes:
+  postgres_data:

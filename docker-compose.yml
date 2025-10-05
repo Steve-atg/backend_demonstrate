@@ -22,7 +22,6 @@ services:
       - postgres
     command: >
       sh -c "npm install && npx prisma generate && npx prisma migrate dev --name init"
-    environment:
-      - DATABASE_URL=postgresql://user:password@postgres:5432/demo_db?schema=public
+
 volumes:
   postgres_data:

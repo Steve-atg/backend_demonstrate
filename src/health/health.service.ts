@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class HealthService {
-  prisma: any;
+  constructor(private prisma: PrismaService) {}
+
   async checkHealth() {
     try {
       await this.prisma.user.count(); // Simple query to test connection

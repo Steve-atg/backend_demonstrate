@@ -43,14 +43,19 @@ export class UsersService {
   async findAll(
     queryDto?: GetUsersQueryDto,
   ): Promise<UserResponseDto[] | PaginatedUsersResponseDto> {
-    // If no query parameters, return simple list
-    if (!queryDto) {
-      const users = await this.prisma.user.findMany({
-        where: { isDeleted: false },
-        orderBy: { createdAt: 'desc' },
-      });
+    try {
+      // If no query parameters, return simple list
+      if (!queryDto) {
+        const users = await this.prisma.user.findMany({
+          where: { isDeleted: false },
+          orderBy: { createdAt: 'desc' },
+        });
 
-      return users.map((user) => new UserResponseDto(user));
+        return users.map((user) => new UserResponseDto(user));
+      }
+    } catch (error) {
+      // Let the global exception filter handle Prisma errors
+      throw error;
     }
 
     // Build where clause
@@ -97,10 +102,18 @@ export class UsersService {
     if (queryDto.createdAfter || queryDto.createdBefore) {
       where.createdAt = {};
       if (queryDto.createdAfter) {
-        where.createdAt.gte = new Date(queryDto.createdAfter);
+        const createdAfterDate = new Date(queryDto.createdAfter);
+        if (isNaN(createdAfterDate.getTime())) {
+          throw new ConflictException('Invalid createdAfter date format');
+        }
+        where.createdAt.gte = createdAfterDate;
       }
       if (queryDto.createdBefore) {
-        where.createdAt.lte = new Date(queryDto.createdBefore);
+        const createdBeforeDate = new Date(queryDto.createdBefore);
+        if (isNaN(createdBeforeDate.getTime())) {
+          throw new ConflictException('Invalid createdBefore date format');
+        }
+        where.createdAt.lte = createdBeforeDate;
       }
     }
 
@@ -108,10 +121,18 @@ export class UsersService {
     if (queryDto.bornAfter || queryDto.bornBefore) {
       where.dateOfBirth = {};
       if (queryDto.bornAfter) {
-        where.dateOfBirth.gte = new Date(queryDto.bornAfter);
+        const bornAfterDate = new Date(queryDto.bornAfter);
+        if (isNaN(bornAfterDate.getTime())) {
+          throw new ConflictException('Invalid bornAfter date format');
+        }
+        where.dateOfBirth.gte = bornAfterDate;
       }
       if (queryDto.bornBefore) {
-        where.dateOfBirth.lte = new Date(queryDto.bornBefore);
+        const bornBeforeDate = new Date(queryDto.bornBefore);
+        if (isNaN(bornBeforeDate.getTime())) {
+          throw new ConflictException('Invalid bornBefore date format');
+        }
+        where.dateOfBirth.lte = bornBeforeDate;
       }
     }
 
@@ -136,11 +157,41 @@ export class UsersService {
     // Pagination
     const page = queryDto.page || 1;
     const limit = queryDto.limit || 10;
+
+    // Validate pagination parameters
+    if (page < 1) {
+      throw new ConflictException('Page number must be greater than 0');
+    }
+    if (limit < 1 || limit > 100) {
+      throw new ConflictException('Limit must be between 1 and 100');
+    }
+
     const skip = (page - 1) * limit;
 
     // Sorting
     const sortBy = queryDto.sortBy || 'createdAt';
     const sortOrder = queryDto.sortOrder || 'desc';
+
+    // Validate sort parameters
+    const allowedSortFields = [
+      'createdAt',
+      'username',
+      'email',
+      'userLevel',
+      'dateOfBirth',
+    ];
+    if (!allowedSortFields.includes(sortBy)) {
+      throw new ConflictException(
+        `Invalid sort field. Allowed fields: ${allowedSortFields.join(', ')}`,
+      );
+    }
+
+    const allowedSortOrders = ['asc', 'desc'];
+    if (!allowedSortOrders.includes(sortOrder)) {
+      throw new ConflictException(
+        `Invalid sort order. Allowed orders: ${allowedSortOrders.join(', ')}`,
+      );
+    }
 
     // Get total count for pagination
     const total = await this.prisma.user.count({ where });

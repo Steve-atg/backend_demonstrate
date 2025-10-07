@@ -82,7 +82,7 @@ export class GetUsersQueryDto {
   // Sorting
   @IsOptional()
   @IsIn(['username', 'email', 'userLevel', 'createdAt', 'updatedAt'])
-  sortBy?: string = 'createdAt';
+  sortBy?: string = 'username';
 
   @IsOptional()
   @IsIn(['asc', 'desc'])

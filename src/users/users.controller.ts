@@ -12,6 +12,7 @@ import {
   HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -21,6 +22,7 @@ import {
   GetUsersQueryDto,
   PaginatedUsersResponseDto,
 } from './dto';
+import { JwtAuthGuard, OptionalJwtAuthGuard } from '../auth/guards';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,12 +30,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     return this.usersService.create(createUserDto);
   }
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Query() queryDto: GetUsersQueryDto,
   ): Promise<UserResponseDto[] | PaginatedUsersResponseDto> {
@@ -41,6 +45,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<UserResponseDto> {
@@ -48,6 +53,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -56,6 +62,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.usersService.remove(id);

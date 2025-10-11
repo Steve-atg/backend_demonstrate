@@ -12,6 +12,7 @@ import {
   HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
+  UseGuards,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import {
@@ -21,6 +22,7 @@ import {
   GetTransactionsQueryDto,
   PaginatedTransactionsResponseDto,
 } from './dto';
+import { JwtAuthGuard, OptionalJwtAuthGuard } from '../auth/guards';
 
 @Controller('transactions')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,6 +30,7 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() createTransactionDto: CreateTransactionDto,
@@ -36,6 +39,7 @@ export class TransactionsController {
   }
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   async findAll(
     @Query() queryDto: GetTransactionsQueryDto,
   ): Promise<TransactionResponseDto[] | PaginatedTransactionsResponseDto> {
@@ -43,6 +47,7 @@ export class TransactionsController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TransactionResponseDto> {
@@ -50,6 +55,7 @@ export class TransactionsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTransactionDto: UpdateTransactionDto,
@@ -58,6 +64,7 @@ export class TransactionsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.transactionsService.remove(id);

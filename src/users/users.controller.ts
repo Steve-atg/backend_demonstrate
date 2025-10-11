@@ -22,7 +22,7 @@ import {
   GetUsersQueryDto,
   PaginatedUsersResponseDto,
 } from './dto';
-import { JwtAuthGuard, OptionalJwtAuthGuard } from '../auth/guards';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -37,7 +37,7 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() queryDto: GetUsersQueryDto,
   ): Promise<UserResponseDto[] | PaginatedUsersResponseDto> {
@@ -45,7 +45,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<UserResponseDto> {

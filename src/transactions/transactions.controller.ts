@@ -22,7 +22,7 @@ import {
   GetTransactionsQueryDto,
   PaginatedTransactionsResponseDto,
 } from './dto';
-import { JwtAuthGuard, OptionalJwtAuthGuard } from '../auth/guards';
+import { JwtAuthGuard } from '../auth/guards';
 
 @Controller('transactions')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -39,7 +39,7 @@ export class TransactionsController {
   }
 
   @Get()
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async findAll(
     @Query() queryDto: GetTransactionsQueryDto,
   ): Promise<TransactionResponseDto[] | PaginatedTransactionsResponseDto> {
@@ -47,7 +47,7 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TransactionResponseDto> {

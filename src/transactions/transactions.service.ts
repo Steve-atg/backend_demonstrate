@@ -18,7 +18,16 @@ export class TransactionsService {
 
   async create(
     createTransactionDto: CreateTransactionDto,
+    currentUserId: string,
+    isAdmin: boolean = false,
   ): Promise<TransactionResponseDto> {
+    // If not admin, user can only create transactions for themselves
+    if (!isAdmin && createTransactionDto.userId !== currentUserId) {
+      throw new ConflictException(
+        'You can only create transactions for yourself',
+      );
+    }
+
     // Check if user exists
     const user = await this.prisma.user.findFirst({
       where: { id: createTransactionDto.userId, isDeleted: false },
@@ -79,6 +88,8 @@ export class TransactionsService {
 
   async findAll(
     queryDto?: GetTransactionsQueryDto,
+    currentUserId?: string,
+    isAdmin: boolean = false,
   ): Promise<TransactionResponseDto[] | PaginatedTransactionsResponseDto> {
     try {
       // If no query parameters, return simple list
@@ -111,6 +122,15 @@ export class TransactionsService {
 
     // Build where clause
     const where: any = { isDeleted: false };
+
+    // If not admin, filter to only show user's own transactions
+    if (!isAdmin && currentUserId) {
+      where.userTransactions = {
+        some: {
+          userId: currentUserId,
+        },
+      };
+    }
 
     // Type filter
     if (queryDto.type) {

@@ -22,7 +22,8 @@ import {
   GetUsersQueryDto,
   PaginatedUsersResponseDto,
 } from './dto';
-import { JwtAuthGuard } from '../auth/guards';
+import { JwtAuthGuard, OwnershipGuard } from '../auth/guards';
+import { CurrentUser, AuthenticatedUser } from '../auth/decorators';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -53,18 +54,39 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<UserResponseDto> {
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: AuthenticatedUser,
+  ): Promise<void> {
     return this.usersService.remove(id);
+  }
+
+  @Get('me/profile')
+  @UseGuards(JwtAuthGuard)
+  async getMyProfile(
+    @CurrentUser() currentUser: AuthenticatedUser,
+  ): Promise<UserResponseDto> {
+    return this.usersService.findOne(currentUser.id);
+  }
+
+  @Patch('me/profile')
+  @UseGuards(JwtAuthGuard)
+  async updateMyProfile(
+    @CurrentUser() currentUser: AuthenticatedUser,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<UserResponseDto> {
+    return this.usersService.update(currentUser.id, updateUserDto);
   }
 }

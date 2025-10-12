@@ -30,7 +30,7 @@ import {
   GetUsersQueryDto,
   PaginatedUsersResponseDto,
 } from './dto';
-import { JwtAuthGuard, OwnershipGuard } from '../auth/guards';
+import { JwtAuthGuard, OwnershipGuard, AdminGuard } from '../auth/guards';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators';
 
 @ApiTags('users')
@@ -63,9 +63,11 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiOperation({
     summary: 'Get all users with optional filtering and pagination',
+    description:
+      'Get list of all users. Only admin users (level 99) can access this endpoint.',
   })
   @ApiResponse({
     status: 200,
@@ -75,6 +77,10 @@ export class UsersController {
   @ApiResponse({
     status: 401,
     description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
   })
   async findAll(
     @Query() queryDto: GetUsersQueryDto,
@@ -126,7 +132,7 @@ export class UsersController {
   }
 
   @Get('me/profile')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   async getMyProfile(
     @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<UserResponseDto> {
@@ -134,7 +140,7 @@ export class UsersController {
   }
 
   @Patch('me/profile')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   async updateMyProfile(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() updateUserDto: UpdateUserDto,

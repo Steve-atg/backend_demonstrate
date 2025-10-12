@@ -6,6 +6,7 @@ import { GlobalExceptionFilter } from './common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const port = process.env.PORT || 3000;
 
   // Setup Swagger
   const config = new DocumentBuilder()
@@ -40,6 +41,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();

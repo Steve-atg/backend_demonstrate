@@ -83,7 +83,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiParam({ name: 'id', description: 'User ID', type: String })
   @ApiResponse({

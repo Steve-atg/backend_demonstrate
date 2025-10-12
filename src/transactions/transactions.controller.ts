@@ -19,7 +19,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiParam,
+  // ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
@@ -94,7 +94,7 @@ export class TransactionsController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTransactionDto: UpdateTransactionDto,
-    @CurrentUser() currentUser: AuthenticatedUser,
+    // @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<TransactionResponseDto> {
     return this.transactionsService.update(id, updateTransactionDto);
   }
@@ -104,7 +104,7 @@ export class TransactionsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() currentUser: AuthenticatedUser,
+    // @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<void> {
     return this.transactionsService.remove(id);
   }

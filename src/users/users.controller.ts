@@ -110,7 +110,7 @@ export class UsersController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @CurrentUser() currentUser: AuthenticatedUser,
+    // @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<UserResponseDto> {
     return this.usersService.update(id, updateUserDto);
   }
@@ -120,7 +120,7 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
-    @CurrentUser() currentUser: AuthenticatedUser,
+    // @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<void> {
     return this.usersService.remove(id);
   }

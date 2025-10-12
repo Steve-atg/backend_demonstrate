@@ -14,6 +14,14 @@ import {
   ClassSerializerInterceptor,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
 import {
   CreateTransactionDto,
@@ -26,14 +34,31 @@ import { JwtAuthGuard, OwnershipGuard } from '../auth/guards';
 import { CurrentUser, AuthenticatedUser } from '../auth/decorators';
 import { ADMIN_LEVEL } from '../auth/guards/ownership.guard';
 
+@ApiTags('transactions')
 @Controller('transactions')
 @UseInterceptors(ClassSerializerInterceptor)
+@ApiBearerAuth('JWT-auth')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new transaction' })
+  @ApiBody({ type: CreateTransactionDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Transaction created successfully',
+    type: TransactionResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - validation error',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
   async create(
     @Body() createTransactionDto: CreateTransactionDto,
     @CurrentUser() currentUser: AuthenticatedUser,

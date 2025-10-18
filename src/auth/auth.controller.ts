@@ -16,8 +16,14 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, AuthResponseDto } from './dto';
-import { JwtAuthGuard } from './guards';
+import {
+  LoginDto,
+  RegisterDto,
+  AuthResponseDto,
+  RefreshTokenDto,
+  RefreshTokenResponseDto,
+} from './dto';
+import { JwtAuthGuard, RefreshTokenGuard } from './guards';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -96,5 +102,48 @@ export class AuthController {
   })
   async getCurrentUser(@Request() req: any) {
     return req.user;
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens refreshed successfully',
+    type: RefreshTokenResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid refresh token',
+  })
+  async refreshTokens(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<RefreshTokenResponseDto> {
+    return this.authService.refreshTokens(refreshTokenDto.refresh_token);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Logout user and revoke refresh token' })
+  @ApiBody({ type: RefreshTokenDto, required: false })
+  @ApiResponse({
+    status: 200,
+    description: 'Logged out successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async logout(@Body() body: { refresh_token?: string }, @Request() req: any) {
+    if (body.refresh_token) {
+      await this.authService.revokeRefreshToken(body.refresh_token);
+    } else {
+      // Revoke all refresh tokens for the user
+      await this.authService.revokeAllUserRefreshTokens(req.user.id);
+    }
+    return { message: 'Logged out successfully' };
   }
 }

@@ -105,6 +105,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @UseGuards(RefreshTokenGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiBody({ type: RefreshTokenDto })
@@ -120,6 +121,8 @@ export class AuthController {
   async refreshTokens(
     @Body() refreshTokenDto: RefreshTokenDto,
   ): Promise<RefreshTokenResponseDto> {
+    // The RefreshTokenGuard has already validated the token
+    // We can get new tokens using the validated token data
     return this.authService.refreshTokens(refreshTokenDto.refresh_token);
   }
 

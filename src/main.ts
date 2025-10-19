@@ -8,6 +8,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000;
 
+  // Enable CORS
+  app.enableCors({
+    origin: process.env.FRONTEND_URL?.split(',') || ['http://localhost:3100'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    credentials: true,
+    maxAge: 3600, // Cache preflight requests for 1 hour
+  });
+
   // Setup Swagger
   const config = new DocumentBuilder()
     .setTitle('Money Tracker API')

@@ -27,7 +27,10 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    jsonDocumentUrl: 'api/json', // Custom JSON route (default: api-json)
+    yamlDocumentUrl: 'api/yaml', // Custom YAML route (default: api-yaml)
+  });
 
   // Enable global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter());

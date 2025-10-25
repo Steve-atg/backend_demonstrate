@@ -11,7 +11,7 @@ import {
   LoginDto,
   RegisterDto,
   AuthResponseDto,
-  RefreshTokenDto,
+  // RefreshTokenDto,
   RefreshTokenResponseDto,
 } from './dto';
 import { JwtPayload } from './strategies/jwt.strategy';
@@ -191,9 +191,9 @@ export class AuthService {
   ): Promise<RefreshTokenResponseDto> {
     try {
       // Verify the refresh token
-      const decoded = this.jwtService.verify(oldRefreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
-      }) as RefreshTokenPayload;
+      // const decoded = this.jwtService.verify(oldRefreshToken, {
+      //   secret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
+      // }) as RefreshTokenPayload;
 
       // Hash the refresh token to find it in database
       const tokenHash = crypto

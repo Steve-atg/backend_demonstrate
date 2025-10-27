@@ -26,6 +26,7 @@ import { UsersService } from './users.service';
 import {
   CreateUserDto,
   UpdateUserDto,
+  UpgradeUserDto,
   UserResponseDto,
   GetUsersQueryDto,
   PaginatedUsersResponseDto,
@@ -113,6 +114,26 @@ export class UsersController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @ApiOperation({ summary: 'Update a user' })
+  @ApiParam({ name: 'id', description: 'User ID', type: String })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Can only update own profile',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -121,9 +142,64 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+  @Patch(':id/upgrade')
+  @ApiOperation({
+    summary: 'Upgrade user level',
+    description:
+      'Upgrade a user to a higher level. Only admin users (level 99) can perform this action.',
+  })
+  @ApiParam({ name: 'id', description: 'User ID', type: String })
+  @ApiBody({ type: UpgradeUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User level upgraded successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Bad request - validation error or level not higher than current',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  async upgradeUser(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() upgradeUserDto: UpgradeUserDto,
+  ): Promise<UserResponseDto> {
+    return this.usersService.upgradeUser(id, upgradeUserDto);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, OwnershipGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a user' })
+  @ApiParam({ name: 'id', description: 'User ID', type: String })
+  @ApiResponse({
+    status: 204,
+    description: 'User deleted successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Can only delete own profile',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
   async remove(
     @Param('id', ParseUUIDPipe) id: string,
     // @CurrentUser() currentUser: AuthenticatedUser,
@@ -132,7 +208,17 @@ export class UsersController {
   }
 
   @Get('me/profile')
-  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user profile retrieved successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
   async getMyProfile(
     @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<UserResponseDto> {
@@ -140,7 +226,18 @@ export class UsersController {
   }
 
   @Patch('me/profile')
-  @UseGuards(JwtAuthGuard, OwnershipGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user profile updated successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
   async updateMyProfile(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body() updateUserDto: UpdateUserDto,

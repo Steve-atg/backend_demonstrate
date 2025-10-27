@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma.service';
 import {
   CreateUserDto,
   UpdateUserDto,
+  UpgradeUserDto,
   UserResponseDto,
   GetUsersQueryDto,
   PaginatedUsersResponseDto,
@@ -276,5 +277,36 @@ export class UsersService {
         deletedAt: new Date(),
       },
     });
+  }
+
+  async upgradeUser(
+    id: string,
+    upgradeUserDto: UpgradeUserDto,
+  ): Promise<UserResponseDto> {
+    // Check if user exists
+    const existingUser = await this.prisma.user.findFirst({
+      where: { id, isDeleted: false },
+    });
+
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if the new level is actually higher than current level
+    if (upgradeUserDto.userLevel <= existingUser.userLevel) {
+      throw new ConflictException(
+        `User level must be higher than current level (${existingUser.userLevel})`,
+      );
+    }
+
+    // Update the user level
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data: {
+        userLevel: upgradeUserDto.userLevel,
+      },
+    });
+
+    return new UserResponseDto(updatedUser);
   }
 }

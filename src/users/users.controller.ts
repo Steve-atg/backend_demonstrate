@@ -68,12 +68,13 @@ export class UsersController {
   @ApiOperation({
     summary: 'Get all users with optional filtering and pagination',
     description:
-      'Get list of all users. Only admin users (level 99) can access this endpoint.',
+      'Get list of all users with comprehensive filtering, sorting, and pagination options. Only admin users (level 99) can access this endpoint.',
   })
   @ApiResponse({
     status: 200,
-    description: 'List of users retrieved successfully',
-    type: [UserResponseDto],
+    description:
+      'List of users retrieved successfully with pagination metadata',
+    type: PaginatedUsersResponseDto,
   })
   @ApiResponse({
     status: 401,
@@ -85,7 +86,7 @@ export class UsersController {
   })
   async findAll(
     @Query() queryDto: GetUsersQueryDto,
-  ): Promise<UserResponseDto[] | PaginatedUsersResponseDto> {
+  ): Promise<PaginatedUsersResponseDto> {
     return this.usersService.findAll(queryDto);
   }
 

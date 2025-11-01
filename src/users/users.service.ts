@@ -43,22 +43,7 @@ export class UsersService {
 
   async findAll(
     queryDto?: GetUsersQueryDto,
-  ): Promise<UserResponseDto[] | PaginatedUsersResponseDto> {
-    try {
-      // If no query parameters, return simple list
-      if (!queryDto) {
-        const users = await this.prisma.user.findMany({
-          where: { isDeleted: false },
-          orderBy: { createdAt: 'desc' },
-        });
-
-        return users.map((user) => new UserResponseDto(user));
-      }
-    } catch (error) {
-      // Let the global exception filter handle Prisma errors
-      throw error;
-    }
-
+  ): Promise<PaginatedUsersResponseDto> {
     // Build where clause
     const where: any = { isDeleted: false };
 

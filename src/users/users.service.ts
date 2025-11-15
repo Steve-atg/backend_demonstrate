@@ -220,17 +220,6 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    // If email is being updated, check if new email is already taken
-    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
-      const emailExists = await this.prisma.user.findUnique({
-        where: { email: updateUserDto.email },
-      });
-
-      if (emailExists) {
-        throw new ConflictException('Email already in use');
-      }
-    }
-
     // Hash password if it's being updated
     const updateData = { ...updateUserDto };
     if (updateUserDto.password) {

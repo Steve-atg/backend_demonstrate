@@ -1,15 +1,59 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transaction, User, Category } from '@prisma/client';
 
 export class TransactionResponseDto {
+  @ApiProperty({
+    description: 'Transaction unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   id: string;
+
+  @ApiProperty({
+    description: 'Transaction type',
+    example: 'SPEND',
+  })
   type: string;
+
+  @ApiProperty({
+    description: 'Transaction amount',
+    example: 29.99,
+  })
   amount: number;
+
+  @ApiProperty({
+    description: 'Currency code',
+    example: 'USD',
+  })
   currency: string;
+
+  @ApiProperty({
+    description: 'Date when the transaction occurred',
+    example: '2024-01-15T10:30:00.000Z',
+  })
   transactionDate: Date;
+
+  @ApiPropertyOptional({
+    description: 'Transaction description',
+    example: 'Grocery shopping at Walmart',
+  })
   description?: string;
+
+  @ApiProperty({
+    description: 'Creation timestamp',
+    example: '2024-01-15T10:30:00.000Z',
+  })
   createdAt: Date;
+
+  @ApiProperty({
+    description: 'Last update timestamp',
+    example: '2024-01-15T10:30:00.000Z',
+  })
   updatedAt: Date;
-  user?: Partial<User>;
+
+  @ApiPropertyOptional({
+    description: 'Associated categories',
+    type: 'array',
+  })
   categories?: Category[];
 
   constructor(
@@ -30,19 +74,6 @@ export class TransactionResponseDto {
     this.description = transaction.description;
     this.createdAt = transaction.createdAt;
     this.updatedAt = transaction.updatedAt;
-
-    // Extract user information if included
-    if (
-      transaction.userTransactions &&
-      transaction.userTransactions.length > 0
-    ) {
-      const user = transaction.userTransactions[0].user;
-      this.user = {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-      };
-    }
 
     // Extract categories if included
     if (transaction.transactionCategory) {

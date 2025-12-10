@@ -36,7 +36,7 @@ export class CreateTransactionDto {
 
   @ApiProperty({
     description: 'The currency code (3 characters)',
-    example: 'USD',
+    example: 'HKD',
     minLength: 3,
     maxLength: 3,
   })

@@ -294,9 +294,10 @@ export class TransactionsService {
       },
     });
 
-    const transactionResponses = transactions.map(
-      (transaction) => new TransactionResponseDto(transaction),
-    );
+    const transactionResponses =
+      transactions.map(
+        (transaction) => new TransactionResponseDto(transaction),
+      ) ?? [];
 
     return new PaginatedTransactionsResponseDto(
       transactionResponses,

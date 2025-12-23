@@ -96,6 +96,30 @@ export class TransactionsController {
     return this.transactionsService.findAll(queryDto, currentUser.id, isAdmin);
   }
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get current user transactions with filtering and pagination',
+  })
+  @ApiQuery({ type: GetTransactionsQueryDto })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Returns paginated list of current user transactions or array of transactions',
+    type: PaginatedTransactionsResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async getMyTransactions(
+    @Query() queryDto: GetTransactionsQueryDto,
+    @CurrentUser() currentUser: AuthenticatedUser,
+  ): Promise<TransactionResponseDto[] | PaginatedTransactionsResponseDto> {
+    // Force non-admin context to ensure only current user's transactions
+    return this.transactionsService.findAll(queryDto, currentUser.id, false);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, OwnershipGuard)
   @ApiOperation({ summary: 'Get a transaction by ID' })

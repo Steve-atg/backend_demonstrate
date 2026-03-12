@@ -19,18 +19,10 @@ export class TransactionsService {
   async create(
     createTransactionDto: CreateTransactionDto,
     currentUserId: string,
-    isAdmin: boolean = false,
   ): Promise<TransactionResponseDto> {
-    // If not admin, user can only create transactions for themselves
-    if (!isAdmin && createTransactionDto.userId !== currentUserId) {
-      throw new ConflictException(
-        'You can only create transactions for yourself',
-      );
-    }
-
     // Check if user exists
     const user = await this.prisma.user.findFirst({
-      where: { id: createTransactionDto.userId, isDeleted: false },
+      where: { id: currentUserId, isDeleted: false },
     });
 
     if (!user) {
@@ -58,7 +50,7 @@ export class TransactionsService {
         description: createTransactionDto.description,
         userTransactions: {
           create: {
-            userId: createTransactionDto.userId,
+            userId: currentUserId,
           },
         },
         transactionCategory: createTransactionDto.categoryIds
@@ -344,17 +336,6 @@ export class TransactionsService {
       throw new NotFoundException('Transaction not found');
     }
 
-    // Check if user exists (if updating userId)
-    if (updateTransactionDto.userId) {
-      const user = await this.prisma.user.findFirst({
-        where: { id: updateTransactionDto.userId, isDeleted: false },
-      });
-
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-    }
-
     // Check if categories exist (if updating categoryIds)
     if (updateTransactionDto.categoryIds) {
       const categories = await this.prisma.category.findMany({
@@ -385,16 +366,6 @@ export class TransactionsService {
     }
     if (updateTransactionDto.description !== undefined) {
       updateData.description = updateTransactionDto.description;
-    }
-
-    // Update user association if needed
-    if (updateTransactionDto.userId) {
-      updateData.userTransactions = {
-        deleteMany: {},
-        create: {
-          userId: updateTransactionDto.userId,
-        },
-      };
     }
 
     // Update category associations if needed

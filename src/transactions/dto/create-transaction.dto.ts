@@ -61,14 +61,6 @@ export class CreateTransactionDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({
-    description: 'The ID of the user who made the transaction',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @IsNotEmpty()
-  @IsUUID()
-  userId: string;
-
   @ApiPropertyOptional({
     description: 'Array of category IDs associated with the transaction',
     example: [

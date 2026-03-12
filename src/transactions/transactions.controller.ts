@@ -64,11 +64,9 @@ export class TransactionsController {
     @Body() createTransactionDto: CreateTransactionDto,
     @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<TransactionResponseDto> {
-    const isAdmin = currentUser.userLevel >= ADMIN_LEVEL;
     return this.transactionsService.create(
       createTransactionDto,
       currentUser.id,
-      isAdmin,
     );
   }
 
